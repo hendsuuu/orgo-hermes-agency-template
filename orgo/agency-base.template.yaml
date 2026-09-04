@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=https://www.orgo.ai/api/template-schema
+# This source is intentionally private: it contains deployment architecture,
+# but never credentials or agent runtime data.
+api_version: orgo.ai/v1
+
+template:
+  name: hermes-agency-base
+  version: 0.1.0
+  description: One Hermes agent per Orgo computer for an agency fleet.
+  source: https://github.com/hendsuuu/orgo-hermes-agency-template
+
+hardware:
+  os: linux
+  cpu: 4
+  ram_gb: 16
+  disk_gb: 40
+  resolution: 1280x720x24
+  auto_stop_minutes: 0
+
+secrets:
+  - name: openrouter_api_key
+    description: OpenRouter API key used by Hermes.
+  - name: telegram_bot_token
+    description: Unique Telegram bot token for this agent.
+  - name: notion_api_key
+    description: Notion integration token for the PM-owned temporary shared Kanban adapter.
+    optional: true
+  - name: composio_api_key
+    description: Composio API key for this agent entity.
+  - name: composio_mcp_url
+    description: Composio MCP endpoint permitted for this agent entity.
+  - name: honcho_api_key
+    description: Honcho key, if the configured provider requires one.
+    optional: true
+  - name: telegram_group_chat_id
+    description: Shared Telegram group ID used by the agency.
+  - name: telegram_allowed_user_ids
+    description: Comma-separated human Telegram user IDs allowed to create work.
+  - name: notion_tasks_database_id
+    description: Shared Notion Tasks database ID.
+    optional: true
+  - name: notion_projects_database_id
+    description: Shared Notion Projects database ID.
+    optional: true
+  - name: notion_agents_database_id
+    description: Shared Notion Agents database ID.
+    optional: true
+  - name: orgo_api_key
+    description: Orgo MCP credential; inject only into the Ops Provisioner computer.
+    optional: true
+
+env:
+  OPENROUTER_API_KEY: { secret: openrouter_api_key }
+  TELEGRAM_BOT_TOKEN: { secret: telegram_bot_token }
+  NOTION_API_KEY: { secret: notion_api_key }
+  COMPOSIO_API_KEY: { secret: composio_api_key }
+  COMPOSIO_MCP_URL: { secret: composio_mcp_url }
+  HONCHO_API_KEY: { secret: honcho_api_key }
+  TELEGRAM_GROUP_CHAT_ID: { secret: telegram_group_chat_id }
+  TELEGRAM_ALLOWED_USER_IDS: { secret: telegram_allowed_user_ids }
+  NOTION_TASKS_DATABASE_ID: { secret: notion_tasks_database_id }
+  NOTION_PROJECTS_DATABASE_ID: { secret: notion_projects_database_id }
+  NOTION_AGENTS_DATABASE_ID: { secret: notion_agents_database_id }
+  ORGO_API_KEY: { secret: orgo_api_key }
+
+build:
+  apt: [git, ripgrep, ffmpeg, jq]
+  run:
+    - curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+    - /root/.hermes/hermes-agent/venv/bin/python -m pip install honcho-ai==2.2.0
+    - python3 -m venv /opt/agency-runtime
+    - /opt/agency-runtime/bin/pip install composio==0.21.0 graphifyy==0.9.51
+    - git clone https://github.com/hendsuuu/orgo-hermes-agency-template.git /opt/agency
+
+apps:
+  - name: hermes-agent
+    title: Hermes Agency Agent
+    services:
+      - name: hermes-gateway
+        run: /opt/agency/bootstrap/start-gateway.sh
+        cwd: /opt/agency
+        user: root
+        restart: always
+
+hooks:
+  on_resume: |
+    /opt/agency/bootstrap/on-resume.sh
+
+egress_policy:
+  mode: allow
+  rules:
+    - api.telegram.org
+    - openrouter.ai
+    - backend.composio.dev
+    - api.notion.com
+    - github.com
+    - '*.github.com'
