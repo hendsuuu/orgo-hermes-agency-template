@@ -2,28 +2,37 @@
 # --model nor AGENCY_MODEL is provided, so cost tiering is a property of the role,
 # not a per-computer decision. A specific seed can still override with --model.
 #
-# Cost principle: high-frequency / low-judgment roles get the cheapest capable
-# model; the expensive model is reserved for rare, hard decisions. Raise a tier
-# only when task quality measurably needs it.
+# Budget profile: beginner-friendly. High-frequency / low-judgment roles run on
+# ultra-cheap Chinese flash models; specialist reasoning uses a cheap Chinese
+# mid-tier; only the rare CEO decisions reach the Sonnet 4.6 ceiling.
 #
-# IMPORTANT: verify every slug against the live list at https://openrouter.ai/models
-# before publishing the template. Slugs change as new model generations ship.
+# Prices below are per 1M tokens (in / out), from the OpenRouter model list.
+# IMPORTANT — verify every slug against https://openrouter.ai/models before
+# publishing; slugs and prices change as new generations ship.
+#
+# NOTE on the ceiling: "anthropic/claude-sonnet-4.6" was NOT found in the
+# OpenRouter list pulled on 2026-09-04 (only newer Anthropic models appeared).
+# Confirm the exact slug resolves on OpenRouter. If it does not, either route the
+# CEO through Anthropic direct instead of OpenRouter, or set the ceiling to the
+# strongest cheap model below (deepseek/deepseek-v4-pro-0813).
 
-# Rare, heavy strategic judgment.
-ceo=anthropic/claude-opus-4.1
+# Ceiling: rare, heavy strategic judgment.        ~$3 / $15
+ceo=anthropic/claude-sonnet-4.6
 
-# Sole dispatcher: frequent, structured routing -> cheapest capable.
-project-manager=anthropic/claude-haiku-4.5
+# Sole dispatcher + provisioning: frequent, structured -> ultra cheap.  $0.03 / $0.13
+project-manager=qwen/qwen3.7-flash
+ops-provisioner=qwen/qwen3.7-flash
 
-# Specialist reasoning / code / content.
-developer=anthropic/claude-sonnet-4.5
-researcher=anthropic/claude-sonnet-4.5
-marketing=anthropic/claude-sonnet-4.5
-content-creator=anthropic/claude-sonnet-4.5
-accountant=anthropic/claude-sonnet-4.5
+# Reading / reporting: cheap flash.               $0.065 / $0.18
+researcher=deepseek/deepseek-v4-flash-0731
+accountant=deepseek/deepseek-v4-flash-0731
 
-# Provisioning: infrequent, tool-driven -> cheap.
-ops-provisioner=anthropic/claude-haiku-4.5
+# Code / reasoning: cheap Chinese mid-tier.       $1.12 / $3.35
+developer=deepseek/deepseek-v4-pro-0813
 
-# Fallback for any unseeded role.
-default=anthropic/claude-sonnet-4.5
+# Content / marketing: cheap Chinese mid-tier.    $1.15 / $3.50
+marketing=z-ai/glm-latest
+content-creator=z-ai/glm-latest
+
+# Fallback for any unseeded role.                 $0.065 / $0.18
+default=deepseek/deepseek-v4-flash-0731

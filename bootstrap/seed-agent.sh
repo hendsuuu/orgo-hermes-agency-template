@@ -52,7 +52,7 @@ if [[ -z "$MODEL" ]]; then
   fi
 fi
 if [[ -z "$MODEL" ]]; then
-  MODEL="anthropic/claude-sonnet-4.5"
+  MODEL="deepseek/deepseek-v4-flash-0731"
 fi
 
 install -d -m 700 /root/.hermes /root/.hermes/plugins /root/.hermes/skills /opt/agency-runtime
