@@ -1,0 +1,5 @@
+name: agency-task
+kind: standalone
+version: 0.1.0
+description: Task-contract capability pack for a Hermes agency worker.
+author: Hermes Agency Template
