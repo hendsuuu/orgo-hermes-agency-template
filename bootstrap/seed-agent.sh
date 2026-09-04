@@ -39,8 +39,20 @@ if [[ "$ROLE" == "ops-provisioner" && -z "${ORGO_API_KEY:-}" ]]; then
   exit 67
 fi
 
+# Resolve the model: explicit --model wins, then AGENCY_MODEL, then the per-role
+# default from config/model-routing.map, then a conservative fallback.
 if [[ -z "$MODEL" ]]; then
-  MODEL="${AGENCY_MODEL:-anthropic/claude-sonnet-4}"
+  MODEL="${AGENCY_MODEL:-}"
+fi
+if [[ -z "$MODEL" ]]; then
+  MAP=/opt/agency/config/model-routing.map
+  if [[ -f "$MAP" ]]; then
+    MODEL=$(grep -E "^${ROLE}=" "$MAP" | head -1 | cut -d= -f2-)
+    [[ -n "$MODEL" ]] || MODEL=$(grep -E "^default=" "$MAP" | head -1 | cut -d= -f2-)
+  fi
+fi
+if [[ -z "$MODEL" ]]; then
+  MODEL="anthropic/claude-sonnet-4.5"
 fi
 
 install -d -m 700 /root/.hermes /root/.hermes/plugins /root/.hermes/skills /opt/agency-runtime

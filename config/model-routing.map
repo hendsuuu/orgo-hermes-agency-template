@@ -1,0 +1,29 @@
+# Per-role default model (OpenRouter slug). seed-agent.sh reads this when neither
+# --model nor AGENCY_MODEL is provided, so cost tiering is a property of the role,
+# not a per-computer decision. A specific seed can still override with --model.
+#
+# Cost principle: high-frequency / low-judgment roles get the cheapest capable
+# model; the expensive model is reserved for rare, hard decisions. Raise a tier
+# only when task quality measurably needs it.
+#
+# IMPORTANT: verify every slug against the live list at https://openrouter.ai/models
+# before publishing the template. Slugs change as new model generations ship.
+
+# Rare, heavy strategic judgment.
+ceo=anthropic/claude-opus-4.1
+
+# Sole dispatcher: frequent, structured routing -> cheapest capable.
+project-manager=anthropic/claude-haiku-4.5
+
+# Specialist reasoning / code / content.
+developer=anthropic/claude-sonnet-4.5
+researcher=anthropic/claude-sonnet-4.5
+marketing=anthropic/claude-sonnet-4.5
+content-creator=anthropic/claude-sonnet-4.5
+accountant=anthropic/claude-sonnet-4.5
+
+# Provisioning: infrequent, tool-driven -> cheap.
+ops-provisioner=anthropic/claude-haiku-4.5
+
+# Fallback for any unseeded role.
+default=anthropic/claude-sonnet-4.5

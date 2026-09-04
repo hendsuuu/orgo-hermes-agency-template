@@ -48,6 +48,20 @@ secrets:
   - name: orgo_api_key
     description: Orgo MCP credential; inject only into the Ops Provisioner computer.
     optional: true
+  - name: agency_control_plane_token
+    description: Shared bearer token workers use to call the control-plane task interface.
+  - name: agency_pm_token
+    description: PM-scoped token guarding assignment/creation endpoints. Falls back to the control-plane token if unset.
+    optional: true
+  - name: agency_control_plane_url
+    description: Base URL of the PM control-plane service. Required on worker computers.
+    optional: true
+  - name: agency_executor_cmd
+    description: Shell command that runs the local Hermes agent headless on one task. Required on worker computers.
+    optional: true
+  - name: telegram_pm_user_ids
+    description: Comma-separated Telegram user IDs allowed to create Assigned tasks via /assign.
+    optional: true
 
 env:
   OPENROUTER_API_KEY: { secret: openrouter_api_key }
@@ -62,6 +76,11 @@ env:
   NOTION_PROJECTS_DATABASE_ID: { secret: notion_projects_database_id }
   NOTION_AGENTS_DATABASE_ID: { secret: notion_agents_database_id }
   ORGO_API_KEY: { secret: orgo_api_key }
+  AGENCY_CONTROL_PLANE_TOKEN: { secret: agency_control_plane_token }
+  AGENCY_PM_TOKEN: { secret: agency_pm_token }
+  AGENCY_CONTROL_PLANE_URL: { secret: agency_control_plane_url }
+  AGENCY_EXECUTOR_CMD: { secret: agency_executor_cmd }
+  TELEGRAM_PM_USER_IDS: { secret: telegram_pm_user_ids }
 
 build:
   apt: [git, ripgrep, ffmpeg, jq]
@@ -71,6 +90,7 @@ build:
     - python3 -m venv /opt/agency-runtime
     - /opt/agency-runtime/bin/pip install composio==0.21.0 graphifyy==0.9.51
     - git clone https://github.com/hendsuuu/orgo-hermes-agency-template.git /opt/agency
+    - /opt/agency-runtime/bin/pip install -r /opt/agency/control-plane/adapter/requirements.txt
 
 apps:
   - name: hermes-agent
@@ -78,6 +98,11 @@ apps:
     services:
       - name: hermes-gateway
         run: /opt/agency/bootstrap/start-gateway.sh
+        cwd: /opt/agency
+        user: root
+        restart: always
+      - name: agency-runtime
+        run: /opt/agency/bootstrap/start-agency-runtime.sh
         cwd: /opt/agency
         user: root
         restart: always
@@ -93,5 +118,9 @@ egress_policy:
     - openrouter.ai
     - backend.composio.dev
     - api.notion.com
+    - api.honcho.dev
     - github.com
     - '*.github.com'
+    # Add the control-plane host here so workers can reach the task interface,
+    # e.g. the PM computer's public hostname or your reverse-proxy domain.
+    # - control-plane.your-agency.example

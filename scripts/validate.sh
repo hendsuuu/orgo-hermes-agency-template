@@ -30,3 +30,8 @@ else:
         yaml.safe_load((root / relative).read_text())
 print('Template validation passed')
 PY
+
+python3 -m py_compile "$ROOT"/control-plane/adapter/*.py \
+  && echo "Adapter modules compile"
+
+( cd "$ROOT/control-plane" && python3 -m adapter.selftest )
