@@ -1,0 +1,21 @@
+version: 1
+group:
+  chat_id: ${TELEGRAM_GROUP_CHAT_ID}
+  allowed_human_user_ids: ${TELEGRAM_ALLOWED_USER_IDS}
+  ignore_bot_messages: true
+
+role_aliases:
+  ceo: ceo
+  project-manager: pm
+  developer: developer
+  marketing: marketing
+  content-creator: content
+  accountant: finance
+  researcher: researcher
+  ops-provisioner: ops
+
+intake:
+  task_backend: notion
+  new_task_status: inbox
+  allow_pm_direct_assignment: true
+  duplicate_key: telegram:{chat_id}:{message_id}
