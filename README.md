@@ -22,7 +22,7 @@ Postgres backend later.
 | `config/` | Secret-free Hermes and environment templates. |
 | `roles/` | Role packs for each one-agent computer. |
 | `plugins/agency-task/` | Hermes plugin contract and task-entry guardrails. |
-| `control-plane/` | Notion schema now; backend-neutral task contract for migration. |
+| `control-plane/` | Notion schema, backend-neutral task contract, and the `adapter/` runtime (intake, HTTP task interface, worker poller, lease reaper). See `docs/control-plane-runtime.md`. |
 | `telegram/` | Group routing and intake policy. |
 | `docs/capability-packs.md` | Base runtime, tool boundaries, and role scopes. |
 

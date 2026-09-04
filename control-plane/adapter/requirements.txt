@@ -1,0 +1,4 @@
+# Control-plane adapter runtime. Installed into /opt/agency-runtime by the Orgo
+# base build. Deliberately tiny: this layer is deterministic transport.
+flask>=3.0,<4.0
+requests>=2.31,<3.0

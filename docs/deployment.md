@@ -26,6 +26,23 @@ The seed step happens after Orgo restores the base and injects secrets. This is
 important: credentials and an individual bot identity never enter the golden
 snapshot.
 
+## Control-plane wiring (task transport)
+
+The `agency-runtime` service starts automatically beside the Hermes gateway and
+picks its job from the seeded role (see `docs/control-plane-runtime.md`). Set
+these launch secrets so it can run:
+
+- **Every computer:** `AGENCY_CONTROL_PLANE_TOKEN` (shared bearer).
+- **PM / control-plane computer only:** `NOTION_API_KEY`, `NOTION_TASKS_DATABASE_ID`,
+  and optionally `AGENCY_PM_TOKEN` and `TELEGRAM_PM_USER_IDS`.
+- **Worker computers only:** `AGENCY_CONTROL_PLANE_URL` (the PM service's reachable
+  URL) and `AGENCY_EXECUTOR_CMD` (your headless Hermes task command). Add the
+  control-plane host to the template `egress_policy` so workers can reach it.
+
+Create the Notion Tasks properties exactly as listed in
+`control-plane/notion/task-property-map.md` before starting the PM service; the
+adapter reads and writes those property names.
+
 ## Role-to-computer starting fleet
 
 | Computer / agent ID | Role | Special capability |
