@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgencyTask",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task_id", "title", "project", "status", "priority", "source", "requested_by", "created_at"],
+  "properties": {
+    "task_id": {"type": "string", "pattern": "^tsk_[a-z0-9_-]{8,}$"},
+    "title": {"type": "string", "minLength": 3, "maxLength": 200},
+    "project": {"type": "string", "minLength": 1},
+    "status": {"enum": ["inbox", "triage", "assigned", "in_progress", "blocked", "review", "done", "cancelled"]},
+    "priority": {"enum": ["critical", "high", "normal", "low"]},
+    "source": {"enum": ["telegram", "pm", "notion", "api", "migration"]},
+    "requested_by": {"type": "string", "minLength": 1},
+    "suggested_assignee": {"type": ["string", "null"]},
+    "assigned_agent": {"type": ["string", "null"]},
+    "parent_task_id": {"type": ["string", "null"]},
+    "telegram": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "chat_id": {"type": "string"},
+        "message_id": {"type": "string"},
+        "thread_id": {"type": ["string", "null"]}
+      }
+    },
+    "description": {"type": "string"},
+    "acceptance_criteria": {"type": "array", "items": {"type": "string"}},
+    "approval_required": {"type": "boolean", "default": false},
+    "lease": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "owner": {"type": "string"},
+        "acquired_at": {"type": "string", "format": "date-time"},
+        "expires_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}
