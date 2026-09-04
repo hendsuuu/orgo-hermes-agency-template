@@ -1,0 +1,20 @@
+# Secrets and generated identity
+.env
+.env.*
+!.env.example
+.agent-ready
+agent-runtime.json
+
+# Hermes runtime state
+.hermes/
+sessions/
+memories/
+logs/
+cache/
+graphify-out/
+
+# Local tooling
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
