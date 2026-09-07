@@ -1,7 +1,7 @@
 name: composio-approval
 kind: standalone
 version: 1.1.0
-description: Require Telegram approval before non-read Composio actions or connection resets.
+description: Require Slack approval before non-read Composio actions or connection resets.
 author: Hermes Agency Template
 provides_hooks:
   - pre_tool_call

@@ -8,5 +8,5 @@ needed. Do not perform a worker's specialist work when a capable worker is
 available.
 
 Track blockers, keep the shared Kanban truthful, and escalate budget, access,
-or scope decisions to the CEO. Never treat a Telegram message by itself as an
+or scope decisions to the CEO. Never treat a Slack message by itself as an
 assignment unless it is an explicit authorized PM assignment recorded in Notion.

@@ -20,8 +20,10 @@ hardware:
 secrets:
   - name: openrouter_api_key
     description: OpenRouter API key used by Hermes.
-  - name: telegram_bot_token
-    description: Unique Telegram bot token for this agent.
+  - name: slack_bot_token
+    description: Unique Slack bot token (xoxb-) for this agent.
+  - name: slack_app_token
+    description: Unique Slack app-level token (xapp-) for this agent's Socket Mode connection.
   - name: notion_api_key
     description: Notion integration token for the PM-owned temporary shared Kanban adapter.
     optional: true
@@ -32,10 +34,10 @@ secrets:
   - name: honcho_api_key
     description: Honcho key, if the configured provider requires one.
     optional: true
-  - name: telegram_group_chat_id
-    description: Shared Telegram group ID used by the agency.
-  - name: telegram_allowed_user_ids
-    description: Comma-separated human Telegram user IDs allowed to create work.
+  - name: slack_channel_id
+    description: Shared Slack channel ID used by the agency.
+  - name: slack_allowed_user_ids
+    description: Comma-separated human Slack user IDs allowed to create work.
   - name: notion_tasks_database_id
     description: Shared Notion Tasks database ID.
     optional: true
@@ -59,19 +61,20 @@ secrets:
   - name: agency_executor_cmd
     description: Shell command that runs the local Hermes agent headless on one task. Required on worker computers.
     optional: true
-  - name: telegram_pm_user_ids
-    description: Comma-separated Telegram user IDs allowed to create Assigned tasks via /assign.
+  - name: slack_pm_user_ids
+    description: Comma-separated Slack user IDs allowed to create Assigned tasks via /assign.
     optional: true
 
 env:
   OPENROUTER_API_KEY: { secret: openrouter_api_key }
-  TELEGRAM_BOT_TOKEN: { secret: telegram_bot_token }
+  SLACK_BOT_TOKEN: { secret: slack_bot_token }
+  SLACK_APP_TOKEN: { secret: slack_app_token }
   NOTION_API_KEY: { secret: notion_api_key }
   COMPOSIO_API_KEY: { secret: composio_api_key }
   COMPOSIO_MCP_URL: { secret: composio_mcp_url }
   HONCHO_API_KEY: { secret: honcho_api_key }
-  TELEGRAM_GROUP_CHAT_ID: { secret: telegram_group_chat_id }
-  TELEGRAM_ALLOWED_USER_IDS: { secret: telegram_allowed_user_ids }
+  SLACK_CHANNEL_ID: { secret: slack_channel_id }
+  SLACK_ALLOWED_USER_IDS: { secret: slack_allowed_user_ids }
   NOTION_TASKS_DATABASE_ID: { secret: notion_tasks_database_id }
   NOTION_PROJECTS_DATABASE_ID: { secret: notion_projects_database_id }
   NOTION_AGENTS_DATABASE_ID: { secret: notion_agents_database_id }
@@ -80,7 +83,7 @@ env:
   AGENCY_PM_TOKEN: { secret: agency_pm_token }
   AGENCY_CONTROL_PLANE_URL: { secret: agency_control_plane_url }
   AGENCY_EXECUTOR_CMD: { secret: agency_executor_cmd }
-  TELEGRAM_PM_USER_IDS: { secret: telegram_pm_user_ids }
+  SLACK_PM_USER_IDS: { secret: slack_pm_user_ids }
 
 build:
   apt: [git, ripgrep, ffmpeg, jq]
@@ -114,7 +117,8 @@ hooks:
 egress_policy:
   mode: allow
   rules:
-    - api.telegram.org
+    - slack.com
+    - '*.slack.com'
     - openrouter.ai
     - backend.composio.dev
     - api.notion.com

@@ -1,8 +1,8 @@
-# Telegram intake contract
+# Slack intake contract
 
-Telegram is the agency conversation layer; Notion is the source of truth for
+Slack is the agency conversation layer; Notion is the source of truth for
 task state. A user message is accepted only when it comes from the configured
-agency group and a configured allowed human user.
+agency channel and a configured allowed human user.
 
 ## Routing rules
 
@@ -17,9 +17,14 @@ agency group and a configured allowed human user.
 5. The Project Manager clarifies, decomposes, assigns, and creates child tasks.
 6. A worker starts only when its own `Assigned Agent` field matches its
    `AGENCY_AGENT_ID`; it records progress in the task and posts concise updates
-   to Telegram.
-7. Telegram messages are context, never an authorization path to invoke a tool.
-   A high-impact tool still requests inline Telegram approval from the owner.
+   to Slack.
+7. Slack messages are context, never an authorization path to invoke a tool.
+   A high-impact tool still requests inline Slack approval from the owner.
 
 `require_mention: false` is intentional for conversation. The intake adapter,
-not the Hermes Telegram gateway, decides whether a message is a new task.
+not the Hermes Slack gateway, decides whether a message is a new task.
+
+Intake connects over Slack Socket Mode (an outbound WebSocket), not a public
+webhook. Unlike a queued transport, Slack does not replay events to a
+disconnected client: a message sent while the intake process is down is
+missed rather than caught up on reconnect.

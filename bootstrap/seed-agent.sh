@@ -26,7 +26,7 @@ ROLE_FILE="/opt/agency/roles/${ROLE}.md"
 set -a
 source /root/.env
 set +a
-for key in OPENROUTER_API_KEY TELEGRAM_BOT_TOKEN TELEGRAM_GROUP_CHAT_ID COMPOSIO_API_KEY COMPOSIO_MCP_URL; do
+for key in OPENROUTER_API_KEY SLACK_BOT_TOKEN SLACK_APP_TOKEN SLACK_CHANNEL_ID COMPOSIO_API_KEY COMPOSIO_MCP_URL; do
   [[ -n "${!key:-}" ]] || { echo "Required launch secret is absent: $key" >&2; exit 67; }
 done
 if [[ "$ROLE" == "project-manager" ]]; then

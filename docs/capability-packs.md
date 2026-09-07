@@ -6,13 +6,13 @@ capability packs—not a different copy of Hermes.
 
 | Component | Base template behavior | Scope |
 | --- | --- | --- |
-| Hermes | Gateway and Telegram conversation runtime | one profile per computer |
+| Hermes | Gateway and Slack conversation runtime | one profile per computer |
 | OpenRouter | Direct native provider through `OPENROUTER_API_KEY` | model selected per seeded agent |
 | Honcho | Agent-private long-term memory namespace | private; curated promotion only |
 | Graphify | Local code/project intelligence runtime | developer by default; per-workspace index |
 | Composio | Connected tool bridge | distinct entity and least-privilege connections |
 | `agency-task` | Shared task contract instructions | every role |
-| `composio-approval` | Inline Telegram approval for writes | every role with Composio |
+| `composio-approval` | Inline Slack approval for writes | every role with Composio |
 | Notion adapter | Shared Kanban transport | PM/intake is authoritative |
 
 Suggested initial scopes:

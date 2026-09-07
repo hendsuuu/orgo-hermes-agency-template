@@ -1,35 +1,41 @@
-"""Telegram intake adapter.
+"""Slack intake adapter.
 
-Turns allowed human group messages into idempotent task records, enforcing the
-intake contract (telegram/intake-contract.md):
+Turns allowed human channel messages into idempotent task records, enforcing
+the intake contract (slack/intake-contract.md):
 
 - Bot-authored messages are never intake (no bot-to-bot loops).
-- Only configured human users in the configured group are accepted.
+- Only configured human users in the configured channel are accepted.
 - A single role tag -> one Inbox task with that role as suggested assignee.
 - Several role tags -> one Inbox parent task for PM triage (not parallel tasks).
 - A PM "/assign <agent-id> <title>" message -> an Assigned task.
-- The duplicate key telegram:<chat_id>:<message_id> makes replays a no-op.
+- The duplicate key slack:<channel_id>:<ts> makes replays a no-op.
 
 This runs on the control-plane computer, which is the only holder of the Notion
 token. It is deterministic transport -- no model tokens are spent here.
+
+Connects to Slack over Socket Mode (an outbound WebSocket opened with
+SLACK_APP_TOKEN), so no public inbound endpoint or signing secret is needed.
+Unlike Telegram's long-poll offset, Slack does not replay events to a
+disconnected Socket Mode client: a message sent while this process is down is
+missed, not caught up on reconnect.
 """
 
 from __future__ import annotations
 
 import re
 import threading
-from pathlib import Path
 from typing import Optional
 
-import requests
+from slack_sdk import WebClient
+from slack_sdk.socket_mode import SocketModeClient
+from slack_sdk.socket_mode.request import SocketModeRequest
+from slack_sdk.socket_mode.response import SocketModeResponse
 
 from .backend import TaskBackend
 from .contract import Task, derive_task_id, utcnow_iso
 from .settings import ServiceSettings
 
-_TG_API = "https://api.telegram.org"
-
-# Telegram role alias -> role file name (mirrors telegram/routing.template.yaml).
+# Slack role alias -> role file name (mirrors slack/routing.template.yaml).
 ROLE_ALIASES = {
     "ceo": "ceo",
     "pm": "project-manager", "project-manager": "project-manager",
@@ -49,42 +55,43 @@ class IntakeAdapter:
     def __init__(self, settings: ServiceSettings, backend: TaskBackend) -> None:
         self._s = settings
         self._backend = backend
-        self._offset_path = Path(settings.offset_file)
         self._stop = threading.Event()
+        self._client: Optional[SocketModeClient] = None
 
     def stop(self) -> None:
         self._stop.set()
+        if self._client is not None:
+            self._client.close()
 
     # --- message classification (pure, testable) ---------------------------
 
-    def classify(self, message: dict) -> Optional[Task]:
-        """Return a Task to create, or None if the message is not intake."""
-        frm = message.get("from") or {}
-        chat = message.get("chat") or {}
-        text = (message.get("text") or "").strip()
-        chat_id = str(chat.get("id", ""))
-        user_id = str(frm.get("id", ""))
-        message_id = str(message.get("message_id", ""))
+    def classify(self, event: dict) -> Optional[Task]:
+        """Return a Task to create, or None if the event is not intake."""
+        text = (event.get("text") or "").strip()
+        channel_id = str(event.get("channel", ""))
+        user_id = str(event.get("user", ""))
+        ts = str(event.get("ts", ""))
+        thread_ts = event.get("thread_ts")
 
-        if frm.get("is_bot"):
+        if event.get("bot_id") or event.get("subtype") == "bot_message":
             return None
-        if self._s.telegram_group_chat_id and chat_id != self._s.telegram_group_chat_id:
+        if self._s.slack_channel_id and channel_id != self._s.slack_channel_id:
             return None
         if self._s.allowed_user_ids and user_id not in self._s.allowed_user_ids:
             return None
         if not text:
             return None
 
-        key = f"telegram:{chat_id}:{message_id}"
+        key = f"slack:{channel_id}:{ts}"
         task_id = derive_task_id(key)
         if self._backend.find_by_task_id(task_id) is not None:
             return None  # idempotent: already ingested
 
         base = dict(
             task_id=task_id, project="inbox", priority="normal",
-            source="telegram", requested_by=user_id, created_at=utcnow_iso(),
+            source="slack", requested_by=user_id, created_at=utcnow_iso(),
             idempotency_key=key, description=text,
-            telegram={"chat_id": chat_id, "message_id": message_id},
+            slack={"channel_id": channel_id, "ts": ts, "thread_ts": thread_ts},
         )
 
         # PM explicit assignment.
@@ -102,11 +109,10 @@ class IntakeAdapter:
         # Zero or several tags: a single Inbox task for PM triage.
         return Task(title=_clip(text), status="inbox", **base)
 
-    def _process_update(self, update: dict) -> None:
-        message = update.get("message") or update.get("channel_post")
-        if not message:
+    def _process_event(self, event: dict) -> None:
+        if event.get("type") != "message":
             return
-        task = self.classify(message)
+        task = self.classify(event)
         if task is None:
             return
         try:
@@ -115,48 +121,37 @@ class IntakeAdapter:
         except Exception as exc:
             print(f"[intake] create failed for {task.task_id}: {exc}")
 
-    # --- long-poll loop ----------------------------------------------------
+    # --- Socket Mode loop ----------------------------------------------------
+
+    def _on_socket_request(self, client: SocketModeClient,
+                            request: SocketModeRequest) -> None:
+        # Slack requires every envelope to be acked within 3 seconds.
+        client.send_socket_mode_response(
+            SocketModeResponse(envelope_id=request.envelope_id)
+        )
+        if request.type != "events_api":
+            return
+        event = request.payload.get("event") or {}
+        self._process_event(event)
 
     def run_forever(self) -> None:
-        if not self._s.telegram_bot_token:
-            print("[intake] TELEGRAM_BOT_TOKEN unset; intake disabled")
+        if not self._s.slack_bot_token or not self._s.slack_app_token:
+            print("[intake] SLACK_BOT_TOKEN/SLACK_APP_TOKEN unset; intake disabled")
             return
-        offset = self._load_offset()
-        print(f"[intake] listening on group {self._s.telegram_group_chat_id or '(any)'}")
-        base = f"{_TG_API}/bot{self._s.telegram_bot_token}"
+        print(f"[intake] listening on channel {self._s.slack_channel_id or '(any)'}")
+        web_client = WebClient(token=self._s.slack_bot_token)
+        client = SocketModeClient(app_token=self._s.slack_app_token, web_client=web_client)
+        client.socket_mode_request_listeners.append(self._on_socket_request)
+        self._client = client
         while not self._stop.is_set():
             try:
-                resp = requests.get(
-                    f"{base}/getUpdates",
-                    params={"offset": offset, "timeout": 25,
-                            "allowed_updates": '["message"]'},
-                    timeout=40,
-                )
-                data = resp.json()
-                if not data.get("ok"):
-                    self._stop.wait(self._s.intake_poll_seconds)
-                    continue
-                for update in data.get("result", []):
-                    offset = update["update_id"] + 1
-                    self._process_update(update)
-                    self._save_offset(offset)
-            except requests.RequestException as exc:
-                print(f"[intake] telegram error: {exc}")
+                client.connect()
+                self._stop.wait()
+            except Exception as exc:
+                print(f"[intake] slack error: {exc}")
                 self._stop.wait(self._s.intake_poll_seconds)
+        client.close()
         print("[intake] stopped")
-
-    def _load_offset(self) -> int:
-        try:
-            return int(self._offset_path.read_text().strip())
-        except (OSError, ValueError):
-            return 0
-
-    def _save_offset(self, offset: int) -> None:
-        try:
-            self._offset_path.parent.mkdir(parents=True, exist_ok=True)
-            self._offset_path.write_text(str(offset))
-        except OSError:
-            pass
 
 
 def _extract_roles(text: str) -> list[str]:

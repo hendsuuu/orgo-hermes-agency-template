@@ -35,7 +35,7 @@ STATUS_LABELS = {
 LABEL_TO_STATUS = {label: key for key, label in STATUS_LABELS.items()}
 
 PRIORITIES = ("critical", "high", "normal", "low")
-SOURCES = ("telegram", "pm", "notion", "api", "migration")
+SOURCES = ("slack", "pm", "notion", "api", "migration")
 
 # Transitions the Project Manager (the sole dispatcher) may perform.
 PM_TRANSITIONS = {
@@ -80,8 +80,8 @@ def parse_iso(value: str) -> datetime:
 def derive_task_id(idempotency_key: str) -> str:
     """Deterministic task id from an idempotency key.
 
-    The same Telegram message (chat_id + message_id) always maps to the same
-    task id, so a replayed update finds the existing task instead of creating a
+    The same Slack message (channel_id + ts) always maps to the same task id,
+    so a replayed event finds the existing task instead of creating a
     duplicate.
     """
     digest = hashlib.sha1(idempotency_key.encode("utf-8")).hexdigest()[:16]
@@ -112,7 +112,7 @@ class Task:
     suggested_assignee: Optional[str] = None
     assigned_agent: Optional[str] = None
     parent_task_id: Optional[str] = None
-    telegram: Optional[dict[str, Any]] = None
+    slack: Optional[dict[str, Any]] = None
     description: str = ""
     acceptance_criteria: list[str] = field(default_factory=list)
     approval_required: bool = False

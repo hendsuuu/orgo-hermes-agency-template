@@ -30,13 +30,13 @@ class ServiceSettings:
     pm_token: str
     lease_ttl_seconds: int
     reap_interval_seconds: int
-    # Telegram intake
-    telegram_bot_token: str
-    telegram_group_chat_id: str
+    # Slack intake
+    slack_bot_token: str
+    slack_app_token: str
+    slack_channel_id: str
     allowed_user_ids: frozenset[str]
     pm_user_ids: frozenset[str]
     intake_poll_seconds: int
-    offset_file: str
 
     @classmethod
     def from_env(cls) -> "ServiceSettings":
@@ -45,7 +45,7 @@ class ServiceSettings:
                    if not os.environ.get(k)]
         if missing:
             raise SystemExit(f"control-plane missing required env: {', '.join(missing)}")
-        allowed = _csv(os.environ.get("TELEGRAM_ALLOWED_USER_IDS", ""))
+        allowed = _csv(os.environ.get("SLACK_ALLOWED_USER_IDS", ""))
         return cls(
             notion_api_key=os.environ["NOTION_API_KEY"],
             tasks_db_id=os.environ["NOTION_TASKS_DATABASE_ID"],
@@ -56,13 +56,12 @@ class ServiceSettings:
             pm_token=os.environ.get("AGENCY_PM_TOKEN", ""),
             lease_ttl_seconds=_int("AGENCY_LEASE_TTL", 900),
             reap_interval_seconds=_int("AGENCY_REAP_INTERVAL", 120),
-            telegram_bot_token=os.environ.get("TELEGRAM_BOT_TOKEN", ""),
-            telegram_group_chat_id=os.environ.get("TELEGRAM_GROUP_CHAT_ID", ""),
+            slack_bot_token=os.environ.get("SLACK_BOT_TOKEN", ""),
+            slack_app_token=os.environ.get("SLACK_APP_TOKEN", ""),
+            slack_channel_id=os.environ.get("SLACK_CHANNEL_ID", ""),
             allowed_user_ids=allowed,
-            pm_user_ids=_csv(os.environ.get("TELEGRAM_PM_USER_IDS", "")),
+            pm_user_ids=_csv(os.environ.get("SLACK_PM_USER_IDS", "")),
             intake_poll_seconds=_int("AGENCY_INTAKE_POLL", 3),
-            offset_file=os.environ.get("AGENCY_TG_OFFSET_FILE",
-                                       "/opt/agency-runtime/.tg-offset"),
         )
 
 

@@ -8,7 +8,7 @@ required=(
   config/config.template.yaml
   orgo/agency-base.template.yaml
   control-plane/contracts/task.schema.json
-  telegram/intake-contract.md
+  slack/intake-contract.md
 )
 for item in "${required[@]}"; do
   [[ -f "$ROOT/$item" ]] || { echo "Missing required file: $item" >&2; exit 1; }
@@ -26,7 +26,7 @@ try:
 except ModuleNotFoundError:
     print('PyYAML unavailable; skipped YAML syntax validation')
 else:
-    for relative in ('config/config.template.yaml', 'orgo/agency-base.template.yaml', 'telegram/routing.template.yaml'):
+    for relative in ('config/config.template.yaml', 'orgo/agency-base.template.yaml', 'slack/routing.template.yaml'):
         yaml.safe_load((root / relative).read_text())
 print('Template validation passed')
 PY

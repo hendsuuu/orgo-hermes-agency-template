@@ -13,7 +13,7 @@ PYTHON=/root/.hermes/hermes-agent/venv/bin/python
 "$HERMES" --version
 "$HERMES" memory status
 "$PYTHON" -c 'import composio, graphifyy; print("Composio and Graphify runtime imports: OK")'
-"$PYTHON" -c 'import telegram; print("Telegram runtime import: OK")'
+"$PYTHON" -c 'import slack_sdk; print("Slack runtime import: OK")'
 
 if [[ -n "${COMPOSIO_MCP_URL:-}" ]]; then
   echo "Composio MCP endpoint is configured. Connection/action tests require an approved task."

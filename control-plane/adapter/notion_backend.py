@@ -40,7 +40,7 @@ _PROPS: dict[str, tuple[str, str]] = {
     "result_ref": ("Result Ref", "rich_text"),
     "tokens_used": ("Tokens Used", "number"),
     "idempotency_key": ("Idempotency Key", "rich_text"),
-    "telegram_ref": ("Telegram Message", "rich_text"),
+    "slack_ref": ("Slack Message", "rich_text"),
     "lease_owner": ("Lease Owner", "rich_text"),
     "lease_expires": ("Lease Expires", "date"),
 }
@@ -167,11 +167,13 @@ class NotionTaskBackend(TaskBackend):
             put("tokens_used", task.tokens_used)
         if only is None or "idempotency_key" in only:
             put("idempotency_key", task.idempotency_key or "")
-        if only is None or "telegram" in only:
+        if only is None or "slack" in only:
             ref = ""
-            if task.telegram:
-                ref = f"{task.telegram.get('chat_id','')}:{task.telegram.get('message_id','')}"
-            props[_PROPS["telegram_ref"][0]] = self._encode(ref, "rich_text")
+            if task.slack:
+                ref = (f"{task.slack.get('channel_id','')}:"
+                       f"{task.slack.get('ts','')}:"
+                       f"{task.slack.get('thread_ts') or ''}")
+            props[_PROPS["slack_ref"][0]] = self._encode(ref, "rich_text")
         if only is None or "lease" in only:
             if task.lease:
                 put("lease_owner", task.lease.owner)
@@ -197,11 +199,12 @@ class NotionTaskBackend(TaskBackend):
         if lease_owner and lease_expires:
             lease = Lease(owner=lease_owner, acquired_at=page.get("created_time", ""),
                           expires_at=_as_zulu(lease_expires))
-        telegram_ref = g("telegram_ref") or ""
-        telegram = None
-        if ":" in telegram_ref:
-            chat_id, _, message_id = telegram_ref.partition(":")
-            telegram = {"chat_id": chat_id, "message_id": message_id}
+        slack_ref = g("slack_ref") or ""
+        slack = None
+        if ":" in slack_ref:
+            channel_id, _, rest = slack_ref.partition(":")
+            ts, _, thread_ts = rest.partition(":")
+            slack = {"channel_id": channel_id, "ts": ts, "thread_ts": thread_ts or None}
         return Task(
             task_id=g("task_id") or "",
             title=g("title") or "",
@@ -214,7 +217,7 @@ class NotionTaskBackend(TaskBackend):
             suggested_assignee=g("suggested_assignee") or None,
             assigned_agent=g("assigned_agent") or None,
             parent_task_id=g("parent_task_id") or None,
-            telegram=telegram,
+            slack=slack,
             description=g("description") or "",
             acceptance_criteria=[l for l in ac.split("\n") if l],
             approval_required=bool(g("approval_required")),

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Orgo runs this after a computer is restored and its launch secrets are injected.
 # Identity-specific setup stays explicit in seed-agent.sh, so a snapshot can never
-# accidentally become a second agent with the wrong Telegram identity.
+# accidentally become a second agent with the wrong Slack identity.
 if [[ -f /opt/agency-runtime/.agent-ready ]]; then
   echo "Hermes agency identity is already seeded. Starting managed services."
 else

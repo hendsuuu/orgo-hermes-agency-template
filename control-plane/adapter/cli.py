@@ -3,7 +3,7 @@
   cd control-plane && python -m adapter.cli serve   # control-plane (PM computer)
   cd control-plane && python -m adapter.cli poll    # worker computer
 
-``serve`` starts the HTTP task interface, the Telegram intake loop, and the lease
+``serve`` starts the HTTP task interface, the Slack intake loop, and the lease
 reaper in one process. ``poll`` runs the worker transport loop. The bootstrap
 scripts pick the right command from the seeded role.
 """

@@ -10,13 +10,13 @@ Two managed services run on every computer (see `orgo/agency-base.template.yaml`
 
 | Service | Script | Job |
 |---|---|---|
-| `hermes-gateway` | `bootstrap/start-gateway.sh` | Hermes Telegram conversation runtime (unchanged) |
+| `hermes-gateway` | `bootstrap/start-gateway.sh` | Hermes Slack conversation runtime |
 | `agency-runtime` | `bootstrap/start-agency-runtime.sh` | picks its job from the seeded role |
 
 `agency-runtime` branches on role:
 
 - **project-manager** → runs `adapter.cli serve`: the HTTP task interface, the
-  Telegram intake loop, and the lease reaper. This is the only computer that
+  Slack intake loop, and the lease reaper. This is the only computer that
   holds the Notion token.
 - **every other role** → runs `adapter.cli poll`: the worker transport loop. It
   talks only to the control-plane over HTTP and never sees the Notion token.
@@ -24,7 +24,7 @@ Two managed services run on every computer (see `orgo/agency-base.template.yaml`
 ## Flow
 
 ```
-Telegram (allowed human) ──► intake.classify ──► backend.create (Inbox)
+Slack (allowed human) ──► intake.classify ──► backend.create (Inbox)
                                                       │
 PM triages + assigns (admin endpoints / /assign) ────┤ status: Assigned, Assigned Agent ID
                                                       ▼
@@ -60,8 +60,8 @@ own task and only through the worker transition table in
 ## PM triage in phase 1
 
 The PM moves work from Triage to Assigned through the admin endpoints — from a
-small PM tool, a script, or a `/assign <agent-id> <title>` Telegram message from
-a configured `TELEGRAM_PM_USER_IDS` user. Autonomous LLM triage by the PM agent
+small PM tool, a script, or a `/assign <agent-id> <title>` Slack message from
+a configured `SLACK_PM_USER_IDS` user. Autonomous LLM triage by the PM agent
 is a later phase; the seam (admin endpoints) is already in place for it.
 
 ## Cost meter
