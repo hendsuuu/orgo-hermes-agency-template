@@ -68,7 +68,7 @@ export AGENCY_ROLE="$ROLE"
 export AGENCY_MODEL="$MODEL"
 export AGENCY_TASK_BACKEND="${AGENCY_TASK_BACKEND:-notion}"
 
-/root/.hermes/hermes-agent/venv/bin/python - <<'PY'
+/usr/local/lib/hermes-agent/venv/bin/python - <<'PY'
 import os
 from pathlib import Path
 

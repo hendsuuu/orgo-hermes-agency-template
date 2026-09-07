@@ -7,13 +7,12 @@ source /root/.env
 source /root/.hermes/.env
 set +a
 
-HERMES=/root/.hermes/hermes-agent/venv/bin/hermes
-PYTHON=/root/.hermes/hermes-agent/venv/bin/python
+HERMES=/usr/local/lib/hermes-agent/venv/bin/hermes
 
 "$HERMES" --version
 "$HERMES" memory status
-"$PYTHON" -c 'import composio, graphifyy; print("Composio and Graphify runtime imports: OK")'
-"$PYTHON" -c 'import slack_sdk; print("Slack runtime import: OK")'
+"$HERMES" gateway list >/dev/null && echo "Slack gateway runtime: OK"
+/opt/agency-runtime/bin/python -c 'import composio, graphifyy, slack_sdk; print("Composio, Graphify, and Slack runtime imports: OK")'
 
 if [[ -n "${COMPOSIO_MCP_URL:-}" ]]; then
   echo "Composio MCP endpoint is configured. Connection/action tests require an approved task."
