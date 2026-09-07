@@ -32,7 +32,7 @@ def main() -> None:
             raise SystemExit(f"expected failure for {bad}")
 
     # Deterministic, well-formed task ids.
-    key = "telegram:123:456"
+    key = "slack:123:456"
     assert derive_task_id(key) == derive_task_id(key)
     assert derive_task_id(key).startswith("tsk_")
 

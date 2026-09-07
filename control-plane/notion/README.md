@@ -8,9 +8,9 @@ Create one agency workspace with these databases:
 
 | Database | Purpose | Minimum properties |
 | --- | --- | --- |
-| Tasks | Work queue and audit trail | Task ID, Title, Project, Status, Priority, Assigned Agent ID, Suggested Assignee ID, Parent Task ID, Source, Requested By, Description, Acceptance Criteria, Telegram Message, Approval Required, Result Ref, Tokens Used, Idempotency Key, Lease Owner, Lease Expires, Created At, Updated At |
+| Tasks | Work queue and audit trail | Task ID, Title, Project, Status, Priority, Assigned Agent ID, Suggested Assignee ID, Parent Task ID, Source, Requested By, Description, Acceptance Criteria, Slack Message, Approval Required, Result Ref, Tokens Used, Idempotency Key, Lease Owner, Lease Expires, Created At, Updated At |
 | Projects | Portfolio and objectives | Project, Owner, Status, Objective, Target Date |
-| Agents | Fleet directory | Agent ID, Role, Computer ID, Telegram Bot, Availability, Current Task, Capability Pack |
+| Agents | Fleet directory | Agent ID, Role, Computer ID, Slack Bot, Availability, Current Task, Capability Pack |
 
 `Status` must use this exact order: `Inbox`, `Triage`, `Assigned`, `In Progress`,
 `Blocked`, `Review`, `Done`, `Cancelled`.

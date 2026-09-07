@@ -23,7 +23,7 @@ per-agent Notion page IDs to run. Keep property names exactly as written here.
 | `approval_required` | Approval Required | Checkbox | PM or approval policy |
 | `result_ref` | Result Ref | Rich text | Assigned worker |
 | `tokens_used` | Tokens Used | Number | Assigned worker (cost meter) |
-| `telegram` | Telegram Message | Rich text (`chat_id:message_id`) | Intake adapter |
+| `slack` | Slack Message | Rich text (`channel_id:ts:thread_ts`) | Intake adapter |
 | `idempotency_key` | Idempotency Key | Rich text | Intake adapter |
 | `lease.owner` | Lease Owner | Rich text | control-plane |
 | `lease.expires_at` | Lease Expires | Date | control-plane |
@@ -32,6 +32,6 @@ per-agent Notion page IDs to run. Keep property names exactly as written here.
 `Status` options must be exactly, in order: `Inbox`, `Triage`, `Assigned`,
 `In Progress`, `Blocked`, `Review`, `Done`, `Cancelled`.
 
-The adapter carries idempotency key `telegram:<chat_id>:<message_id>` for Telegram
-intake and derives a deterministic `Task ID` from it, so replaying the same
-update locates the existing task rather than creating another one.
+The adapter carries idempotency key `slack:<channel_id>:<ts>` for Slack intake
+and derives a deterministic `Task ID` from it, so replaying the same event
+locates the existing task rather than creating another one.

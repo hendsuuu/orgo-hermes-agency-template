@@ -1,7 +1,7 @@
 # Notion to custom Kanban migration
 
 The portable `AgencyTask` contract in `control-plane/contracts/task.schema.json`
-is the integration boundary. The Telegram intake and every worker should depend
+is the integration boundary. The Slack intake and every worker should depend
 on that contract, not on Notion property names.
 
 ## Phase 1 — Notion

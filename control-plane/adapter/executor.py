@@ -43,7 +43,7 @@ def build_task_brief(task: Task) -> str:
         lines.append("Acceptance criteria:")
         lines += [f"  - {c}" for c in task.acceptance_criteria]
     if task.approval_required:
-        lines.append("NOTE: high-impact actions require inline Telegram approval.")
+        lines.append("NOTE: high-impact actions require inline Slack approval.")
     return "\n".join(lines)
 
 

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Second managed service on every computer. It selects its job from the seeded
 # role: the Project Manager computer runs the control-plane (HTTP task interface
-# + Telegram intake + lease reaper); every other role runs the worker poller.
+# + Slack intake + lease reaper); every other role runs the worker poller.
 #
 # This is separate from start-gateway.sh (the Hermes conversation gateway) so
 # task transport and conversation fail and restart independently.

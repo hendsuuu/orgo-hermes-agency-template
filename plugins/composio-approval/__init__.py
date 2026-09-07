@@ -53,7 +53,7 @@ def _ask(slugs: Iterable[str], operation: str) -> dict[str, str] | None:
         return None
     return {
         "action": "block",
-        "message": "BLOCKED: no explicit Telegram approval. Do not retry through another tool.",
+        "message": "BLOCKED: no explicit Slack approval. Do not retry through another tool.",
     }
 
 

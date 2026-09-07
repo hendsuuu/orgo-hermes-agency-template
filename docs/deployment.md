@@ -10,7 +10,7 @@ and pushed to its private GitHub source.
    golden base with Hermes, the common runtime, and no agent identity.
 3. For each role, create a computer from the golden template and enter the
    declared launch secrets in Orgo. Each computer needs a unique
-   `TELEGRAM_BOT_TOKEN`. Only the PM/control-plane computer receives the Notion
+   `SLACK_BOT_TOKEN` and `SLACK_APP_TOKEN`. Only the PM/control-plane computer receives the Notion
    token and Tasks database ID; only Ops receives `ORGO_API_KEY`.
 4. Using the restricted Ops/Provisioner pathway, run:
 
@@ -20,7 +20,7 @@ and pushed to its private GitHub source.
    ```
 
 5. Only after verification succeeds, allow the supervised Hermes gateway to
-   start. Add the bot to the agency Telegram group and test one PM-assigned task.
+   start. Add the bot to the agency Slack channel and test one PM-assigned task.
 
 The seed step happens after Orgo restores the base and injects secrets. This is
 important: credentials and an individual bot identity never enter the golden
@@ -34,7 +34,7 @@ these launch secrets so it can run:
 
 - **Every computer:** `AGENCY_CONTROL_PLANE_TOKEN` (shared bearer).
 - **PM / control-plane computer only:** `NOTION_API_KEY`, `NOTION_TASKS_DATABASE_ID`,
-  and optionally `AGENCY_PM_TOKEN` and `TELEGRAM_PM_USER_IDS`.
+  and optionally `AGENCY_PM_TOKEN` and `SLACK_PM_USER_IDS`.
 - **Worker computers only:** `AGENCY_CONTROL_PLANE_URL` (the PM service's reachable
   URL) and `AGENCY_EXECUTOR_CMD` (your headless Hermes task command). Add the
   control-plane host to the template `egress_policy` so workers can reach it.

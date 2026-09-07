@@ -10,18 +10,18 @@
     "project": {"type": "string", "minLength": 1},
     "status": {"enum": ["inbox", "triage", "assigned", "in_progress", "blocked", "review", "done", "cancelled"]},
     "priority": {"enum": ["critical", "high", "normal", "low"]},
-    "source": {"enum": ["telegram", "pm", "notion", "api", "migration"]},
+    "source": {"enum": ["slack", "pm", "notion", "api", "migration"]},
     "requested_by": {"type": "string", "minLength": 1},
     "suggested_assignee": {"type": ["string", "null"]},
     "assigned_agent": {"type": ["string", "null"]},
     "parent_task_id": {"type": ["string", "null"]},
-    "telegram": {
+    "slack": {
       "type": ["object", "null"],
       "additionalProperties": false,
       "properties": {
-        "chat_id": {"type": "string"},
-        "message_id": {"type": "string"},
-        "thread_id": {"type": ["string", "null"]}
+        "channel_id": {"type": "string"},
+        "ts": {"type": "string"},
+        "thread_ts": {"type": ["string", "null"]}
       }
     },
     "description": {"type": "string"},

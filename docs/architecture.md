@@ -1,10 +1,10 @@
 # Agency architecture
 
 ```text
-Human in Telegram group
+Human in Slack channel
         │  tag / PM assignment
         ▼
-Telegram intake adapter ── idempotent create ──► Notion Tasks (authority)
+Slack intake adapter ── idempotent create ──► Notion Tasks (authority)
                                                      │
                                     PM triage + assignment only
                                                      │
@@ -14,10 +14,10 @@ Orgo computer: CEO              Orgo computer: Developer     Orgo computer: Mark
 Hermes + private memory         Hermes + Graphify             Hermes + private memory
 Honcho + Composio               Honcho + Composio             Honcho + Composio
       │                              │                             │
-      └──── concise status / result back to Telegram + task record ┘
+      └──── concise status / result back to Slack + task record ┘
 ```
 
-Each computer owns exactly one Hermes profile and one Telegram bot token. This
+Each computer owns exactly one Hermes profile and one Slack bot token. This
 prevents identity, tool credential, and private-memory leakage between roles.
 All fleet coordination travels through the task contract, rather than invisible
 prompt-to-prompt delegation.
@@ -26,11 +26,11 @@ prompt-to-prompt delegation.
 
 | Boundary | Rule |
 | --- | --- |
-| Telegram | Human conversation, intake, delivery, and approval surface—not shared state authority. |
+| Slack | Human conversation, intake, delivery, and approval surface—not shared state authority. |
 | Notion | Initial shared task authority; one serialized adapter owns writes. |
 | Hermes computer | One role; local filesystem and Graphify index are private to that agent. |
 | Honcho | Per-agent private namespace by default; PM/CEO explicitly promotes durable shared knowledge. |
-| Composio | Separate entity/connection scope per agent; writes require inline Telegram approval. |
+| Composio | Separate entity/connection scope per agent; writes require inline Slack approval. |
 | Orgo MCP | Held only by Ops Provisioner/CEO; all mutations require approval. |
 
 ## Models
