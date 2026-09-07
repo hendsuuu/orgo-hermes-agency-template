@@ -89,7 +89,7 @@ build:
   apt: [git, ripgrep, ffmpeg, jq]
   run:
     - curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
-    - /usr/local/lib/hermes-agent/venv/bin/python -m pip install honcho-ai==2.2.0
+    - /root/.hermes/bin/uv pip install --python /usr/local/lib/hermes-agent/venv/bin/python honcho-ai==2.2.0
     - python3 -m venv /opt/agency-runtime
     - /opt/agency-runtime/bin/pip install composio==0.21.0 graphifyy==0.9.51
     - git clone https://github.com/hendsuuu/orgo-hermes-agency-template.git /opt/agency

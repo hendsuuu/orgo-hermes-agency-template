@@ -2,4 +2,5 @@
 # base build. Deliberately tiny: this layer is deterministic transport.
 flask>=3.0,<4.0
 requests>=2.31,<3.0
-slack_sdk[socket-mode]>=3.27,<4.0
+slack_sdk>=3.27,<4.0
+websocket-client>=1.6,<2.0
